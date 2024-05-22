@@ -48,12 +48,33 @@ app.get('/api/products/:id', async (req, res) => {
     res.status(500).message({message: error.message})
   }
 })
-app.post('/api/products', (req, res) => {
+app.post('/api/products', async (req, res) => {
+  try {
+    const newProduct = new ProductModel({ ...req.body });
+    await newProduct.save();
+    const products = await ProductModel.find({});
+
+    res.status(201).send({
+      message: "created succesfully",
+      newProduct: newProduct,
+      allProducts: products,
+    });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
 })
-app.delete('/api/products/:id', (req, res) => {
+app.delete('/api/products/:id', async(req, res) => {
   const { id } = req.params;
   try {
-    
+    const deletedProduct = await ProductModel.findByIdAndDelete(id)
+    const products = await ProductModel.find({})
+
+    res.status(200).send({
+      message: "deleted successfully",
+      deletedProduct: deletedProduct,
+      allProducts: products
+    }
+    )
   } catch (error) {
     res.status(500).message({message: error.message})
   }
